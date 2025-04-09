@@ -57,7 +57,7 @@ var myGameArea = {
         this.canvas.height = 270; // Imposta l'altezza del canvas.
         this.context = this.canvas.getContext("2d"); // Ottiene il contesto 2D per disegnare.
         document.body.insertBefore(this.canvas, document.body.childNodes[0]); // Inserisce il canvas nel DOM.
-        this.interval = setInterval(updateGameArea, 20); // Chiama la funzione di aggiornamento ogni 20 ms.
+        this.interval = setInterval(updateGameArea, 10); // Chiama la funzione di aggiornamento ogni 20 ms.
     },
 
     drawGameObject: function (gameObject) { // Disegna un oggetto sul canvas.
@@ -136,10 +136,46 @@ var blueRectangle = { // Stesse proprietà e metodi del rettangolo rosso, ma con
     }
 };
 
-function updateGameArea() { // Funzione chiamata periodicamente per aggiornare l'area di gioco.
-    myGameArea.clear(); // Pulisce il canvas.
-    redRectangle.update(); // Aggiorna lo stato del rettangolo rosso.
-    blueRectangle.update(); // Aggiorna lo stato del rettangolo blu.
-    myGameArea.drawGameObject(redRectangle); // Disegna il rettangolo rosso.
-    myGameArea.drawGameObject(blueRectangle); // Disegna il rettangolo blu.
+// Aggiungi questa funzione dopo la dichiarazione dei rettangoli
+function checkCollision(rect1, rect2) {
+    return rect1.x < rect2.x + rect2.width &&
+           rect1.x + rect1.width > rect2.x &&
+           rect1.y < rect2.y + rect2.height &&
+           rect1.y + rect1.height > rect2.y;
+}
+
+function updateGameArea() {
+    // Salva le posizioni precedenti
+    let prevRedX = redRectangle.x;
+    let prevBlueX = blueRectangle.x;
+    
+    myGameArea.clear();
+    
+    // Aggiorna le posizioni
+    redRectangle.update();
+    blueRectangle.update();
+    
+    // Controlla le collisioni
+    if (checkCollision(redRectangle, blueRectangle)) {
+        // Controlla se uno dei rettangoli è attaccato al canvas
+        if (redRectangle.x <= 0 || redRectangle.x + redRectangle.width >= myGameArea.canvas.width) {
+            // Se il rosso è attaccato al canvas, ripristina solo la posizione del blu
+            blueRectangle.x = prevBlueX;
+            blueRectangle.speedX = 0;
+        } else if (blueRectangle.x <= 0 || blueRectangle.x + blueRectangle.width >= myGameArea.canvas.width) {
+            // Se il blu è attaccato al canvas, ripristina solo la posizione del rosso
+            redRectangle.x = prevRedX;
+            redRectangle.speedX = 0;
+        } else {
+            // Se nessuno è attaccato al canvas, ripristina entrambe le posizioni
+            redRectangle.x = prevRedX;
+            blueRectangle.x = prevBlueX;
+            // Ferma il movimento di entrambi
+            redRectangle.speedX = 0;
+            blueRectangle.speedX = 0;
+        }
+    }
+    
+    myGameArea.drawGameObject(redRectangle);
+    myGameArea.drawGameObject(blueRectangle);
 }
