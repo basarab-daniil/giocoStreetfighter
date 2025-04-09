@@ -1,136 +1,134 @@
 function startGame() {
-    myGameArea.start();
+    myGameArea.start(); // Avvia l'area di gioco (canvas) e il ciclo di aggiornamento.
 
     // Listener per i tasti
-    window.addEventListener("keydown", function (e) {
-        const jumpStrength = -10; // Forza del salto
-        switch (e.key.toLowerCase()) {
+    window.addEventListener("keydown", function (e) { // Aggiunge un listener per la pressione dei tasti.
+        const jumpStrength = -10; // Forza del salto.
+        switch (e.key.toLowerCase()) { // Controlla quale tasto è stato premuto.
             // Controlli per il rettangolo rosso
             case "w": // Salto
-                if (redRectangle.isOnGround()) {
-                    redRectangle.speedY = jumpStrength;
+                if (redRectangle.isOnGround()) { // Salta solo se il rettangolo è a terra.
+                    redRectangle.speedY = jumpStrength; // Imposta la velocità verticale per il salto.
                 }
                 break;
             case "a": // Sinistra
-                redRectangle.speedX = -2;
+                redRectangle.speedX = -2; // Imposta la velocità orizzontale verso sinistra.
                 break;
             case "d": // Destra
-                redRectangle.speedX = 2;
+                redRectangle.speedX = 2; // Imposta la velocità orizzontale verso destra.
                 break;
 
             // Controlli per il rettangolo blu
             case "arrowup": // Salto
-                if (blueRectangle.isOnGround()) {
-                    blueRectangle.speedY = jumpStrength;
+                if (blueRectangle.isOnGround()) { // Salta solo se il rettangolo è a terra.
+                    blueRectangle.speedY = jumpStrength; // Imposta la velocità verticale per il salto.
                 }
                 break;
             case "arrowleft": // Sinistra
-                blueRectangle.speedX = -2;
+                blueRectangle.speedX = -2; // Imposta la velocità orizzontale verso sinistra.
                 break;
             case "arrowright": // Destra
-                blueRectangle.speedX = 2;
+                blueRectangle.speedX = 2; // Imposta la velocità orizzontale verso destra.
                 break;
         }
     });
 
-    window.addEventListener("keyup", function (e) {
-        switch (e.key.toLowerCase()) {
+    window.addEventListener("keyup", function (e) { // Aggiunge un listener per il rilascio dei tasti.
+        switch (e.key.toLowerCase()) { // Controlla quale tasto è stato rilasciato.
             // Ferma il movimento del rettangolo rosso
             case "a":
             case "d":
-                redRectangle.speedX = 0;
+                redRectangle.speedX = 0; // Ferma il movimento orizzontale.
                 break;
 
             // Ferma il movimento del rettangolo blu
             case "arrowleft":
             case "arrowright":
-                blueRectangle.speedX = 0;
+                blueRectangle.speedX = 0; // Ferma il movimento orizzontale.
                 break;
         }
     });
 }
 
 var myGameArea = {
-    canvas: document.createElement("canvas"),
+    canvas: document.createElement("canvas"), // Crea un elemento canvas.
     start: function () {
-        this.canvas.width = 480;
-        this.canvas.height = 270;
-        this.context = this.canvas.getContext("2d");
-        document.body.insertBefore(this.canvas, document.body.childNodes[0]);
-        this.interval = setInterval(updateGameArea, 20); //ogni 20 ms chiamo il metodo updateGameArea
+        this.canvas.width = 480; // Imposta la larghezza del canvas.
+        this.canvas.height = 270; // Imposta l'altezza del canvas.
+        this.context = this.canvas.getContext("2d"); // Ottiene il contesto 2D per disegnare.
+        document.body.insertBefore(this.canvas, document.body.childNodes[0]); // Inserisce il canvas nel DOM.
+        this.interval = setInterval(updateGameArea, 20); // Chiama la funzione di aggiornamento ogni 20 ms.
     },
 
-    drawGameObject: function (gameObject) {
-        this.context.fillStyle = gameObject.color;
-        this.context.fillRect(gameObject.x, gameObject.y, gameObject.width, gameObject.height);
+    drawGameObject: function (gameObject) { // Disegna un oggetto sul canvas.
+        this.context.fillStyle = gameObject.color; // Imposta il colore di riempimento.
+        this.context.fillRect(gameObject.x, gameObject.y, gameObject.width, gameObject.height); // Disegna un rettangolo.
     },
 
-    clear: function () {
-        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    clear: function () { // Pulisce il canvas.
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height); // Cancella tutto il contenuto del canvas.
     }
 };
 
 var redRectangle = {
-    speedX: 0,
-    speedY: 0,
-    width: 60,
-    height: 150,
-    x: 10,
-    y: 120, // Posizione iniziale
-    color: "red",
-    gravity: 0.5, // Gravità
-    gravitySpeed: 0,
+    speedX: 0, // Velocità orizzontale iniziale.
+    speedY: 0, // Velocità verticale iniziale.
+    width: 60, // Larghezza del rettangolo.
+    height: 150, // Altezza del rettangolo.
+    x: 10, // Posizione iniziale sull'asse X.
+    y: 120, // Posizione iniziale sull'asse Y.
+    color: "red", // Colore del rettangolo.
+    gravity: 0.5, // Gravità applicata al rettangolo.
+    gravitySpeed: 0, // Velocità accumulata dalla gravità.
 
-    update: function () {
-        this.gravitySpeed += this.gravity; // Applica la gravità
-        this.x += this.speedX;
-        this.y += this.speedY + this.gravitySpeed;
+    update: function () { // Aggiorna la posizione e lo stato del rettangolo.
+        this.gravitySpeed += this.gravity; // Incrementa la velocità verticale con la gravità.
+        this.x += this.speedX; // Aggiorna la posizione orizzontale.
+        this.y += this.speedY + this.gravitySpeed; // Aggiorna la posizione verticale.
 
         // Controlla collisioni con il terreno
-        if (this.y + this.height > myGameArea.canvas.height) {
-            this.y = myGameArea.canvas.height - this.height; // Resta sul terreno
-            this.gravitySpeed = 0; // Ferma la gravità
-            this.speedY = 0; // Ferma il movimento verticale
+        if (this.y + this.height > myGameArea.canvas.height) { // Se tocca il terreno.
+            this.y = myGameArea.canvas.height - this.height; // Rimane sul terreno.
+            this.gravitySpeed = 0; // Ferma la gravità.
+            this.speedY = 0; // Ferma il movimento verticale.
         }
 
         // Impedisce di uscire dai bordi della canvas
-        if (this.x < 0) this.x = 0; // Bordo sinistro
-        if (this.x + this.width > myGameArea.canvas.width) this.x = myGameArea.canvas.width - this.width; // Bordo destro
-        if (this.y < 0) this.y = 0; // Bordo superiore
+        if (this.x < 0) this.x = 0; // Bordo sinistro.
+        if (this.x + this.width > myGameArea.canvas.width) this.x = myGameArea.canvas.width - this.width; // Bordo destro.
+        if (this.y < 0) this.y = 0; // Bordo superiore.
     },
 
-    isOnGround: function () {
+    isOnGround: function () { // Verifica se il rettangolo è a terra.
         return this.y + this.height >= myGameArea.canvas.height;
     }
 };
 
-var blueRectangle = {
+var blueRectangle = { // Stesse proprietà e metodi del rettangolo rosso, ma con colore e posizione iniziale diversi.
     speedX: 0,
     speedY: 0,
     width: 60,
     height: 150,
     x: 100,
-    y: 120, // Posizione iniziale
+    y: 120,
     color: "blue",
-    gravity: 0.5, // Gravità
+    gravity: 0.5,
     gravitySpeed: 0,
 
     update: function () {
-        this.gravitySpeed += this.gravity; // Applica la gravità
+        this.gravitySpeed += this.gravity;
         this.x += this.speedX;
         this.y += this.speedY + this.gravitySpeed;
 
-        // Controlla collisioni con il terreno
         if (this.y + this.height > myGameArea.canvas.height) {
-            this.y = myGameArea.canvas.height - this.height; // Resta sul terreno
-            this.gravitySpeed = 0; // Ferma la gravità
-            this.speedY = 0; // Ferma il movimento verticale
+            this.y = myGameArea.canvas.height - this.height;
+            this.gravitySpeed = 0;
+            this.speedY = 0;
         }
 
-        // Impedisce di uscire dai bordi della canvas
-        if (this.x < 0) this.x = 0; // Bordo sinistro
-        if (this.x + this.width > myGameArea.canvas.width) this.x = myGameArea.canvas.width - this.width; // Bordo destro
-        if (this.y < 0) this.y = 0; // Bordo superiore
+        if (this.x < 0) this.x = 0;
+        if (this.x + this.width > myGameArea.canvas.width) this.x = myGameArea.canvas.width - this.width;
+        if (this.y < 0) this.y = 0;
     },
 
     isOnGround: function () {
@@ -138,10 +136,10 @@ var blueRectangle = {
     }
 };
 
-function updateGameArea() {
-    myGameArea.clear();
-    redRectangle.update();
-    blueRectangle.update();
-    myGameArea.drawGameObject(redRectangle);
-    myGameArea.drawGameObject(blueRectangle);
+function updateGameArea() { // Funzione chiamata periodicamente per aggiornare l'area di gioco.
+    myGameArea.clear(); // Pulisce il canvas.
+    redRectangle.update(); // Aggiorna lo stato del rettangolo rosso.
+    blueRectangle.update(); // Aggiorna lo stato del rettangolo blu.
+    myGameArea.drawGameObject(redRectangle); // Disegna il rettangolo rosso.
+    myGameArea.drawGameObject(blueRectangle); // Disegna il rettangolo blu.
 }
