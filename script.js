@@ -2,33 +2,55 @@ function startGame() {
     myGameArea.start(); // Avvia l'area di gioco (canvas) e il ciclo di aggiornamento.
 
     // Listener per i tasti
-    window.addEventListener("keydown", function (e) { // Aggiunge un listener per la pressione dei tasti.
-        const jumpStrength = -10; // Forza del salto.
-        switch (e.key.toLowerCase()) { // Controlla quale tasto è stato premuto.
-            // Controlli per il rettangolo rosso
-            case "w": // Salto
-                if (redRectangle.isOnGround()) { // Salta solo se il rettangolo è a terra.
-                    redRectangle.speedY = jumpStrength; // Imposta la velocità verticale per il salto.
+    window.addEventListener("keydown", function (e) {
+        const jumpStrength = -10;
+        switch (e.key.toLowerCase()) {
+            case "w":
+                if (redRectangle.isOnGround()) {
+                    redRectangle.speedY = jumpStrength;
                 }
                 break;
-            case "a": // Sinistra
-                redRectangle.speedX = -2; // Imposta la velocità orizzontale verso sinistra.
+            case "a":
+                redIntendedDirection = -1;
+                redRectangle.speedX = -2;
                 break;
-            case "d": // Destra
-                redRectangle.speedX = 2; // Imposta la velocità orizzontale verso destra.
+            case "d":
+                redIntendedDirection = 1;
+                redRectangle.speedX = 2;
                 break;
-
-            // Controlli per il rettangolo blu
-            case "arrowup": // Salto
-                if (blueRectangle.isOnGround()) { // Salta solo se il rettangolo è a terra.
-                    blueRectangle.speedY = jumpStrength; // Imposta la velocità verticale per il salto.
+            case "arrowup":
+                if (blueRectangle.isOnGround()) {
+                    blueRectangle.speedY = jumpStrength;
                 }
                 break;
-            case "arrowleft": // Sinistra
-                blueRectangle.speedX = -2; // Imposta la velocità orizzontale verso sinistra.
+            case "arrowleft":
+                blueIntendedDirection = -1;
+                blueRectangle.speedX = -2;
                 break;
-            case "arrowright": // Destra
-                blueRectangle.speedX = 2; // Imposta la velocità orizzontale verso destra.
+            case "arrowright":
+                blueIntendedDirection = 1;
+                blueRectangle.speedX = 2;
+                break;
+        }
+    });
+    
+    window.addEventListener("keyup", function (e) {
+        switch (e.key.toLowerCase()) {
+            case "a":
+                if (redIntendedDirection === -1) redIntendedDirection = 0;
+                redRectangle.speedX = 0;
+                break;
+            case "d":
+                if (redIntendedDirection === 1) redIntendedDirection = 0;
+                redRectangle.speedX = 0;
+                break;
+            case "arrowleft":
+                if (blueIntendedDirection === -1) blueIntendedDirection = 0;
+                blueRectangle.speedX = 0;
+                break;
+            case "arrowright":
+                if (blueIntendedDirection === 1) blueIntendedDirection = 0;
+                blueRectangle.speedX = 0;
                 break;
         }
     });
@@ -50,6 +72,10 @@ function startGame() {
     });
 }
 
+// Aggiungi queste variabili dopo la dichiarazione dei rettangoli
+var redIntendedDirection = 0;  // -1 per sinistra, 0 per fermo, 1 per destra
+var blueIntendedDirection = 0; // -1 per sinistra, 0 per fermo, 1 per destra
+
 var myGameArea = {
     canvas: document.createElement("canvas"), // Crea un elemento canvas.
     start: function () {
@@ -57,7 +83,7 @@ var myGameArea = {
         this.canvas.height = 270; // Imposta l'altezza del canvas.
         this.context = this.canvas.getContext("2d"); // Ottiene il contesto 2D per disegnare.
         document.body.insertBefore(this.canvas, document.body.childNodes[0]); // Inserisce il canvas nel DOM.
-        this.interval = setInterval(updateGameArea, 10); // Chiama la funzione di aggiornamento ogni 20 ms.
+        this.interval = setInterval(updateGameArea, 15); // Chiama la funzione di aggiornamento ogni 20 ms.
     },
 
     drawGameObject: function (gameObject) { // Disegna un oggetto sul canvas.
@@ -145,7 +171,6 @@ function checkCollision(rect1, rect2) {
 }
 
 function updateGameArea() {
-    // Salva le posizioni precedenti
     let prevRedX = redRectangle.x;
     let prevBlueX = blueRectangle.x;
     
@@ -157,22 +182,21 @@ function updateGameArea() {
     
     // Controlla le collisioni
     if (checkCollision(redRectangle, blueRectangle)) {
-        // Controlla se uno dei rettangoli è attaccato al canvas
-        if (redRectangle.x <= 0 || redRectangle.x + redRectangle.width >= myGameArea.canvas.width) {
-            // Se il rosso è attaccato al canvas, ripristina solo la posizione del blu
-            blueRectangle.x = prevBlueX;
-            blueRectangle.speedX = 0;
-        } else if (blueRectangle.x <= 0 || blueRectangle.x + blueRectangle.width >= myGameArea.canvas.width) {
-            // Se il blu è attaccato al canvas, ripristina solo la posizione del rosso
-            redRectangle.x = prevRedX;
-            redRectangle.speedX = 0;
-        } else {
-            // Se nessuno è attaccato al canvas, ripristina entrambe le posizioni
-            redRectangle.x = prevRedX;
-            blueRectangle.x = prevBlueX;
-            // Ferma il movimento di entrambi
-            redRectangle.speedX = 0;
-            blueRectangle.speedX = 0;
+        // Ripristina le posizioni
+        redRectangle.x = prevRedX;
+        blueRectangle.x = prevBlueX;
+        
+        // Applica le direzioni intese solo se c'è spazio per muoversi
+        if (redIntendedDirection === -1 && redRectangle.x > 0) {
+            redRectangle.speedX = -2;
+        } else if (redIntendedDirection === 1 && redRectangle.x < myGameArea.canvas.width - redRectangle.width) {
+            redRectangle.speedX = 2;
+        }
+        
+        if (blueIntendedDirection === -1 && blueRectangle.x > 0) {
+            blueRectangle.speedX = -2;
+        } else if (blueIntendedDirection === 1 && blueRectangle.x < myGameArea.canvas.width - blueRectangle.width) {
+            blueRectangle.speedX = 2;
         }
     }
     
